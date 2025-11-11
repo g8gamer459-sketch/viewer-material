@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
-  <title>Jardim para a Minha Namorada 💗</title>
+  <title>Projecto Escolar 3B</title>
   <style>
     :root{
       --accent:#b4388f; --petal:#ffe3f1; --petal-stroke:#e6a4c7; --center:#ffd86b; --center-stroke:#e6b84a;
@@ -20,51 +20,33 @@
       justify-content:center;
       align-items:center;
       position:relative;
-      touch-action: manipulation;
-      -webkit-overflow-scrolling: touch; /* Melhora scrolling no iOS */
+      touch-action: manipulation; /* Previne gestos padrão do navegador */
     }
 
     #garden{
       position:absolute;
       inset:0;
       overflow:hidden;
-      touch-action: none;
-      /* Forçar aceleração de hardware para melhor performance */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
+      touch-action: none; /* Previne scroll acidental */
     }
 
+    /* ✅ Totalmente responsivo e sem overflow */
     .lily{
       position:absolute;
-      width:22vmin;
+      width:22vmin; /* escala proporcional ao ecrã */
       height:22vmin;
       transform:translate(-50%, -50%) scale(0.2);
       transform-origin:center;
       filter: drop-shadow(0 8px 20px rgba(180,56,143,.28));
       opacity:0;
-      /* Transições otimizadas para mobile */
-      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+      transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .5s ease;
       pointer-events:none;
-      z-index: 1;
-      /* Forçar aceleração de hardware */
-      will-change: transform, opacity;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
+      z-index: 1; /* Garante que as flores ficam acima de outros elementos */
     }
 
     .lily.pop{
       opacity:1;
-      transform:translate(-50%, -50%) scale(1) rotate(var(--rot, 0deg));
-    }
-
-    /* Animação adicional para as flores - otimizada para mobile */
-    @keyframes float {
-      0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(var(--rot, 0deg)); }
-      50% { transform: translate(-50%, -52%) scale(1.02) rotate(var(--rot, 0deg)); }
-    }
-
-    .lily.pop {
-      animation: float 4s ease-in-out infinite;
+      transform:translate(-50%, -50%) scale(1);
     }
 
     #clickHint{
@@ -80,16 +62,10 @@
       pointer-events:none;
       font-family:'Helvetica Neue','Roboto','Segoe UI',sans-serif;
       animation:fadeHint 3s ease-in-out infinite alternate;
-      z-index: 2;
-      /* Otimização para mobile */
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      z-index: 2; /* Garante que fica acima das flores */
     }
 
-    @keyframes fadeHint{
-      0% { opacity: 0.22; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0.36; transform: translate(-50%, -50%) scale(1.05); }
-    }
+    @keyframes fadeHint{from{opacity:.22;}to{opacity:.36;}}
 
     #reset{
       position:fixed;
@@ -102,16 +78,7 @@
       box-shadow:0 6px 18px rgba(0,0,0,.18);
       z-index:10;
       cursor: pointer;
-      touch-action: manipulation;
-      transition: all 0.2s ease;
-      /* Melhorar aparência no mobile */
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    #reset:active{
-      transform: scale(0.95);
-      box-shadow:0 3px 9px rgba(0,0,0,.18);
+      touch-action: manipulation; /* Melhora a resposta ao toque */
     }
 
     /* Melhorias para dispositivos móveis */
@@ -124,20 +91,6 @@
       #clickHint {
         font-size: 4vmin;
         letter-spacing: 0.4em;
-        padding: 0 2vmin;
-      }
-      
-      .lily {
-        width: 25vmin;
-        height: 25vmin;
-      }
-    }
-
-    /* Para telas muito pequenas */
-    @media (max-width: 480px) {
-      #clickHint {
-        font-size: 3.5vmin;
-        letter-spacing: 0.2em;
       }
     }
 
@@ -153,47 +106,15 @@
       opacity:0;
       transition:opacity .3s ease;
       z-index: 10;
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
     }
 
-    .max-note.show{
-      opacity:1;
-      animation: pulse 1.2s ease-in-out;
-    }
-
-    @keyframes pulse {
-      0% { transform: translateX(-50%) scale(1); }
-      50% { transform: translateX(-50%) scale(1.1); }
-      100% { transform: translateX(-50%) scale(1); }
-    }
-
-    /* Indicador de toque para mobile */
-    .touch-indicator {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(180, 56, 143, 0.3);
-      transform: translate(-50%, -50%) scale(0);
-      pointer-events: none;
-      z-index: 5;
-    }
-    
-    .touch-indicator.active {
-      animation: touchRipple 0.6s ease-out;
-    }
-    
-    @keyframes touchRipple {
-      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
-    }
+    .max-note.show{opacity:1;}
   </style>
 </head>
 <body>
 
   <div id="garden"></div>
-  <div id="clickHint">TOCA NO ECRÃ 💕</div>
+  <div id="clickHint">CLICA NO ECRÃ</div>
   <div class="max-note" id="maxNote">Limite atingido 💗</div>
   <button id="reset">Limpar</button>
 
@@ -202,7 +123,6 @@ const garden = document.getElementById('garden');
 const maxNote = document.getElementById('maxNote');
 const resetBtn = document.getElementById('reset');
 const MAX = 70;
-let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 // Previne comportamentos padrão indesejados em dispositivos móveis
 document.addEventListener('touchmove', function(e) {
@@ -212,32 +132,6 @@ document.addEventListener('touchmove', function(e) {
 document.addEventListener('gesturestart', function(e) {
   e.preventDefault();
 });
-
-// Detectar se é um dispositivo com touch
-function hasTouch() {
-  return 'ontouchstart' in document.documentElement ||
-         navigator.maxTouchPoints > 0 ||
-         navigator.msMaxTouchPoints > 0;
-}
-
-// Criar efeito visual de toque
-function createTouchIndicator(x, y) {
-  if (!hasTouch()) return;
-  
-  const indicator = document.createElement('div');
-  indicator.className = 'touch-indicator active';
-  indicator.style.left = x + 'px';
-  indicator.style.top = y + 'px';
-  
-  garden.appendChild(indicator);
-  
-  // Remover após a animação
-  setTimeout(() => {
-    if (indicator.parentNode) {
-      indicator.parentNode.removeChild(indicator);
-    }
-  }, 600);
-}
 
 function makeLilySVG(){
   const svgNS = 'http://www.w3.org/2000/svg';
@@ -282,18 +176,12 @@ function plantLilyAt(x,y){
   lily.className='lily';
   lily.style.left = x + 'px';
   lily.style.top = y + 'px';
-  
-  // Adicionar rotação aleatória
-  const rotation = (Math.random() * 20 - 10);
-  lily.style.setProperty('--rot', rotation + 'deg');
+  lily.style.setProperty('--rot', (Math.random()*20-10)+'deg');
 
   lily.appendChild(makeLilySVG());
   garden.appendChild(lily);
 
-  // Usar requestAnimationFrame para melhor performance
-  requestAnimationFrame(() => {
-    lily.classList.add('pop');
-  });
+  requestAnimationFrame(()=>lily.classList.add('pop'));
 }
 
 function handle(e){
@@ -307,9 +195,6 @@ function handle(e){
   if (e.type === 'touchstart' || e.type === 'touchmove') {
     x = e.touches[0].clientX - rect.left;
     y = e.touches[0].clientY - rect.top;
-    
-    // Criar efeito visual de toque
-    createTouchIndicator(x, y);
   } else {
     x = e.clientX - rect.left;
     y = e.clientY - rect.top;
@@ -329,11 +214,7 @@ garden.addEventListener('click', handle);
 
 // Eventos para dispositivos móveis
 garden.addEventListener('touchstart', handle, {passive: false});
-
-// Adicionar evento de toque contínuo para criar várias flores com um gesto
-if (hasTouch()) {
-  garden.addEventListener('touchmove', handle, {passive: false});
-}
+garden.addEventListener('touchmove', handle, {passive: false});
 
 resetBtn.addEventListener('click',()=>{
   garden.innerHTML='';
@@ -344,23 +225,9 @@ resetBtn.addEventListener('click',()=>{
 
 // Flor inicial
 window.addEventListener('load',()=>{
-  // Pequeno delay para garantir que o DOM está totalmente carregado
-  setTimeout(() => {
-    const r=garden.getBoundingClientRect();
-    plantLilyAt(r.width/2, r.height*0.55);
-  }, 100);
+  const r=garden.getBoundingClientRect();
+  plantLilyAt(r.width/2, r.height*0.55);
 });
-
-// Melhorar performance em dispositivos móveis
-if (isMobile) {
-  // Reduzir o número máximo de flores em dispositivos mais fracos
-  MAX = 50;
-  
-  // Otimizações adicionais para iOS
-  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-    document.body.style.webkitTransform = 'translate3d(0,0,0)';
-  }
-}
 </script>
 </body>
 </html>
