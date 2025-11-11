@@ -29,11 +29,12 @@
       touch-action:manipulation;
     }
 
+    /* ✅ Totalmente responsivo e sem overflow */
     .lily{
       position:absolute;
-      width:22vmin;
+      width:22vmin; /* escala proporcional ao ecrã */
       height:22vmin;
-      transform:translate(-50%, -50%) scale(0.1);
+      transform:translate(-50%, -50%) scale(0.2);
       transform-origin:center;
       filter: drop-shadow(0 8px 20px rgba(180,56,143,.28));
       opacity:0;
@@ -48,15 +49,14 @@
 
     #clickHint{
       position:fixed;
-      top:50%;left:50%;
-      transform:translate(-50%, -50%) scaleX(1.8);
+      top:50%;left:50%;transform:translate(-50%, -50%) scaleX(2);
       width:100%;
       text-align:center;
-      font-size:4vmin;
+      font-size:3.5vmin;
       color:#d1469c;
       opacity:0.25;
       font-weight:300;
-      letter-spacing:0.5em;
+      letter-spacing:0.6em;
       pointer-events:none;
       font-family:'Helvetica Neue','Roboto','Segoe UI',sans-serif;
       animation:fadeHint 3s ease-in-out infinite alternate;
@@ -80,4 +80,106 @@
       position:fixed;
       left:50%;bottom:4vmin;
       transform:translateX(-50%);
-      background:#f
+      background:#ffffffdd;
+      border-radius:999px;
+      padding:1vmin 2.6vmin;
+      font-size:2.2vmin;
+      border:1px solid #efc8e5;
+      opacity:0;
+      transition:opacity .3s ease;
+    }
+
+    .max-note.show{opacity:1;}
+  </style>
+</head>
+<body>
+
+  <div id="garden"></div>
+  <div id="clickHint">CLICA NO ECRÃ TOTÓ</div>
+  <div class="max-note" id="maxNote">Limite atingido 💗</div>
+  <button id="reset">Limpar</button>
+
+<script>
+const garden = document.getElementById('garden');
+const maxNote = document.getElementById('maxNote');
+const resetBtn = document.getElementById('reset');
+const MAX = 70;
+
+function makeLilySVG(){
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('viewBox','0 0 200 200');
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height','100%');
+
+  const flowerG = document.createElementNS(svgNS,'g');
+  flowerG.setAttribute('transform','matrix(0.95,-0.14,0.08,0.92,10,0)');
+
+  for(let i=0;i<5;i++){
+    const g = document.createElementNS(svgNS,'g');
+    g.setAttribute('fill','var(--petal)');
+    g.setAttribute('stroke','var(--petal-stroke)');
+    g.setAttribute('stroke-width','2');
+    g.setAttribute('transform',`rotate(${i*72} 100 100)`);
+    const path = document.createElementNS(svgNS,'path');
+    path.setAttribute('d','M100 20 C78 42, 60 92, 100 146 C140 92, 122 42, 100 20');
+    g.appendChild(path);
+    flowerG.appendChild(g);
+  }
+
+  const center = document.createElementNS(svgNS,'circle');
+  center.setAttribute('cx','100'); center.setAttribute('cy','100'); center.setAttribute('r','18');
+  center.setAttribute('fill','var(--center)'); center.setAttribute('stroke','var(--center-stroke)');
+  center.setAttribute('stroke-width','2');
+  flowerG.appendChild(center);
+
+  svg.appendChild(flowerG);
+  return svg;
+}
+
+function plantLilyAt(x,y){
+  if(garden.childElementCount >= MAX){
+    maxNote.classList.add('show');
+    setTimeout(()=>maxNote.classList.remove('show'),1200);
+    return;
+  }
+
+  const lily = document.createElement('div');
+  lily.className='lily';
+  lily.style.left = x + 'px';
+  lily.style.top = y + 'px';
+  lily.style.setProperty('--rot', (Math.random()*20-10)+'deg');
+
+  lily.appendChild(makeLilySVG());
+  garden.appendChild(lily);
+
+  requestAnimationFrame(()=>lily.classList.add('pop'));
+}
+
+function handle(e){
+  const rect = garden.getBoundingClientRect();
+  const x = (e.touches ? e.touches[0].clientX : e.clientX)-rect.left;
+  const y = (e.touches ? e.touches[0].clientY : e.clientY)-rect.top;
+
+  hideHint();
+  plantLilyAt(x,y);
+}
+
+function hideHint(){
+  const h=document.getElementById('clickHint');
+  if(h) h.style.display='none';
+}
+
+garden.addEventListener('click', handle);
+garden.addEventListener('touchstart', (e)=>{e.preventDefault();handle(e);},{passive:false});
+
+resetBtn.addEventListener('click',()=>garden.innerHTML='');
+
+// Flor inicial
+window.addEventListener('load',()=>{
+  const r=garden.getBoundingClientRect();
+  plantLilyAt(r.width/2, r.height*0.55);
+});
+</script>
+</body>
+</html>
