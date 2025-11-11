@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
   <title>Projecto Escolar 3B</title>
   <style>
     :root{
@@ -20,13 +20,14 @@
       justify-content:center;
       align-items:center;
       position:relative;
+      touch-action: manipulation; /* Previne gestos padrão do navegador */
     }
 
     #garden{
       position:absolute;
       inset:0;
       overflow:hidden;
-      touch-action:manipulation;
+      touch-action: none; /* Previne scroll acidental */
     }
 
     /* ✅ Totalmente responsivo e sem overflow */
@@ -40,6 +41,7 @@
       opacity:0;
       transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .5s ease;
       pointer-events:none;
+      z-index: 1; /* Garante que as flores ficam acima de outros elementos */
     }
 
     .lily.pop{
@@ -49,7 +51,7 @@
 
     #clickHint{
       position:fixed;
-      top:50%;left:50%;transform:translate(-50%, -50%) scaleX(2);
+      top:50%;left:50%;transform:translate(-50%, -50%);
       width:100%;
       text-align:center;
       font-size:3.5vmin;
@@ -60,6 +62,7 @@
       pointer-events:none;
       font-family:'Helvetica Neue','Roboto','Segoe UI',sans-serif;
       animation:fadeHint 3s ease-in-out infinite alternate;
+      z-index: 2; /* Garante que fica acima das flores */
     }
 
     @keyframes fadeHint{from{opacity:.22;}to{opacity:.36;}}
@@ -74,6 +77,21 @@
       font-size:2vmin;font-weight:600;
       box-shadow:0 6px 18px rgba(0,0,0,.18);
       z-index:10;
+      cursor: pointer;
+      touch-action: manipulation; /* Melhora a resposta ao toque */
+    }
+
+    /* Melhorias para dispositivos móveis */
+    @media (max-width: 768px) {
+      #reset {
+        padding: 1.5vmin 3vmin;
+        font-size: 2.5vmin;
+      }
+      
+      #clickHint {
+        font-size: 4vmin;
+        letter-spacing: 0.4em;
+      }
     }
 
     .max-note{
@@ -87,6 +105,7 @@
       border:1px solid #efc8e5;
       opacity:0;
       transition:opacity .3s ease;
+      z-index: 10;
     }
 
     .max-note.show{opacity:1;}
@@ -95,7 +114,7 @@
 <body>
 
   <div id="garden"></div>
-  <div id="clickHint">CLICA NO ECRÃ TOTÓ</div>
+  <div id="clickHint">CLICA NO ECRÃ</div>
   <div class="max-note" id="maxNote">Limite atingido 💗</div>
   <button id="reset">Limpar</button>
 
@@ -104,6 +123,15 @@ const garden = document.getElementById('garden');
 const maxNote = document.getElementById('maxNote');
 const resetBtn = document.getElementById('reset');
 const MAX = 70;
+
+// Previne comportamentos padrão indesejados em dispositivos móveis
+document.addEventListener('touchmove', function(e) {
+  if (e.scale !== 1) { e.preventDefault(); }
+}, { passive: false });
+
+document.addEventListener('gesturestart', function(e) {
+  e.preventDefault();
+});
 
 function makeLilySVG(){
   const svgNS = 'http://www.w3.org/2000/svg';
@@ -157,9 +185,20 @@ function plantLilyAt(x,y){
 }
 
 function handle(e){
+  // Previne comportamentos padrão
+  e.preventDefault();
+  
+  // Obtém coordenadas corretas tanto para mouse quanto para toque
   const rect = garden.getBoundingClientRect();
-  const x = (e.touches ? e.touches[0].clientX : e.clientX)-rect.left;
-  const y = (e.touches ? e.touches[0].clientY : e.clientY)-rect.top;
+  let x, y;
+  
+  if (e.type === 'touchstart' || e.type === 'touchmove') {
+    x = e.touches[0].clientX - rect.left;
+    y = e.touches[0].clientY - rect.top;
+  } else {
+    x = e.clientX - rect.left;
+    y = e.clientY - rect.top;
+  }
 
   hideHint();
   plantLilyAt(x,y);
@@ -170,10 +209,19 @@ function hideHint(){
   if(h) h.style.display='none';
 }
 
+// Eventos para desktop
 garden.addEventListener('click', handle);
-garden.addEventListener('touchstart', (e)=>{e.preventDefault();handle(e);},{passive:false});
 
-resetBtn.addEventListener('click',()=>garden.innerHTML='');
+// Eventos para dispositivos móveis
+garden.addEventListener('touchstart', handle, {passive: false});
+garden.addEventListener('touchmove', handle, {passive: false});
+
+resetBtn.addEventListener('click',()=>{
+  garden.innerHTML='';
+  // Mostra o hint novamente após limpar
+  const h=document.getElementById('clickHint');
+  if(h) h.style.display='block';
+});
 
 // Flor inicial
 window.addEventListener('load',()=>{
