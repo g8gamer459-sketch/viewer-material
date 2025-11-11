@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projecto Escolar 3B</title>
+  <style>
+    :root{
+      --bg1:#fff8fb; --bg2:#fbeeff; --accent:#b4388f; --petal:#ffe3f1; --petal-stroke:#e6a4c7; --center:#ffd86b; --center-stroke:#e6b84a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #fff1f8 0%, #f7e7ff 50%, #ffeef6 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color:#7b2b63;
+      -webkit-tap-highlight-color: transparent;
+      position:relative;
+      overflow:hidden;
+    }
+    header{
+      position: fixed; inset: 12px 12px auto 12px; z-index: 3;
+      display:flex; align-items:center; gap:10px; pointer-events:none;
+    }
+    .badge{pointer-events:auto; background:#ffffffaa; backdrop-filter: blur(6px); border:1px solid #efc8e5; padding:10px 14px; border-radius:14px; box-shadow:0 6px 20px rgba(180,56,143,.15)}
+    .title{font-weight:700; color:var(--accent)}
+    .hint{font-size:.9rem; opacity:.85}
+
+    #garden{
+      position:relative; width:100%; height:100%; overflow:hidden;
+    }
+    .lily {
+      position:absolute;
+      width:140px;
+      height:140px;
+      transform: scale(.1) rotate(0deg);
+      transform-origin: center;
+      filter: drop-shadow(0 12px 22px rgba(180,56,143,.22));
+      opacity:0;
+      transition: transform 700ms cubic-bezier(.25,.8,.25,1), opacity 600ms ease;
+    }
+    .lily.pop { transform: scale(1) rotate(var(--rot)); opacity:1; }
+    .max-note{
+      position: fixed; left:50%; bottom:18px; transform:translateX(-50%);
+      background:#ffffffdd; border:1px solid #efc8e5; padding:10px 14px; border-radius:999px; font-size:.95rem;
+      box-shadow:0 10px 24px rgba(0,0,0,.08); opacity:0; transition:opacity .4s ease;
+    }
+    .max-note.show{opacity:1}
+    button#reset{
+      position:fixed; right:12px; bottom:12px; z-index:3;
+      background:var(--accent); color:#fff; border:none; border-radius:999px; padding:10px 14px; font-weight:600;
+      box-shadow:0 10px 24px rgba(180,56,143,.28);
+    }
+  #clickHint{
+      position:fixed;
+      top:50%; left:50%; transform:translate(-50%, -50%) scaleX(2.8);
+      width:100%; text-align:center;
+      font-size:2.6rem;
+      color:#d1469c;
+      opacity:0.18;
+      font-weight:300;
+      letter-spacing:10px;
+      pointer-events:none;
+      font-family:'Helvetica Neue','Roboto','Segoe UI',sans-serif;
+      animation: subtleFade 3.5s ease-in-out infinite alternate;
+    }
+  @keyframes subtleFade{
+      from{opacity:0.18;}
+      to{opacity:0.32;}
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="garden" aria-label="Jardim de lírios" role="application"></div>
+  <div id="clickHint">clica no ecrã totó</div>
+  <div class="max-note" id="maxNote">Limite atingido 💗</div>
+  <button id="reset" aria-label="Limpar lírios">Limpar</button>
+
+  <script>
+    const garden = document.getElementById('garden');
+    const maxNote = document.getElementById('maxNote');
+    const resetBtn = document.getElementById('reset');
+    const MAX = 70; // <- limite de lírios
+
+    function makeLilySVG(size=140, stemLenPx=160){
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const unitsPerPx = 200/size; // 200 viewBox units = 'size' pixels
+      const stemUnits = Math.max(40*unitsPerPx, stemLenPx*unitsPerPx);
+      const totalUnitsH = 200 + stemUnits;
+
+      const svg = document.createElementNS(svgNS,'svg');
+      svg.setAttribute('viewBox',`0 0 200 ${totalUnitsH}`);
+      svg.setAttribute('width', size);
+      svg.setAttribute('height', size + stemLenPx);
+      svg.setAttribute('preserveAspectRatio','xMidYMin meet');
+
+      // grupo flor (vista ligeiramente de lado)
+      const flowerG = document.createElementNS(svgNS,'g');
+      flowerG.setAttribute('transform','matrix(0.95,-0.14,0.08,0.92,10,0)'); // inclinação para "lado"
+
+      for(let i=0;i<5;i++){
+        const g = document.createElementNS(svgNS,'g');
+        g.setAttribute('fill','var(--petal)');
+        g.setAttribute('stroke','var(--petal-stroke)');
+        g.setAttribute('stroke-width','2');
+        g.setAttribute('class','petal');
+        g.setAttribute('transform',`rotate(${i*72} 100 100)`);
+        const path = document.createElementNS(svgNS,'path');
+        path.setAttribute('d','M100 20 C78 42, 60 92, 100 146 C140 92, 122 42, 100 20');
+        g.appendChild(path);
+        for(let t=0;t<3;t++){
+          const v = document.createElementNS(svgNS,'path');
+          v.setAttribute('d',`M100 ${40+t*22} C ${95-t*6} ${65+t*8}, ${96} ${95+t*10}, 100 ${116+t*6}`);
+          v.setAttribute('stroke','rgba(230,164,199,.7)');
+          v.setAttribute('stroke-width','1');
+          v.setAttribute('fill','none');
+          g.appendChild(v);
+        }
+        flowerG.appendChild(g);
+      }
+      const center = document.createElementNS(svgNS,'circle');
+      center.setAttribute('cx','100'); center.setAttribute('cy','100'); center.setAttribute('r','18');
+      center.setAttribute('fill','var(--center)'); center.setAttribute('stroke','var(--center-stroke)'); center.setAttribute('stroke-width','2');
+      flowerG.appendChild(center);
+
+      const stamenGroup = document.createElementNS(svgNS,'g');
+      stamenGroup.setAttribute('stroke','#c88f3a');
+      stamenGroup.setAttribute('stroke-width','3');
+      stamenGroup.setAttribute('stroke-linecap','round');
+      for(const [x2,y2] of [[100,65],[120,75],[80,75],[112,88],[88,88]]){
+        const line = document.createElementNS(svgNS,'line');
+        line.setAttribute('x1','100'); line.setAttribute('y1','100');
+        line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+        stamenGroup.appendChild(line);
+      }
+      flowerG.appendChild(stamenGroup);
+      svg.appendChild(flowerG);
+
+      // (caule removido conforme pedido)
+
+      return svg;
+    }
+
+    function plantLilyAt(x,y){
+      if(garden.childElementCount >= MAX){
+        maxNote.classList.add('show');
+        setTimeout(()=>maxNote.classList.remove('show'), 1500);
+        return;
+      }
+      const rect = garden.getBoundingClientRect();
+      const stemLenPx = Math.max(40, rect.bottom - (rect.top + y) - 8); // até ao fundo
+
+      const wrapper = document.createElement('div');
+      wrapper.className='lily';
+      const rot = (Math.random()*20-10).toFixed(1)+'deg';
+      const scale = 0.9 + Math.random()*0.4;
+      const size = 130 + Math.floor(Math.random()*30);
+
+      // posiciona para que o centro da flor esteja no clique e o caule siga para baixo
+      wrapper.style.left = (x - size/2) + 'px';
+      wrapper.style.top  = (y - size/2) + 'px';
+      wrapper.style.width = size + 'px';
+      wrapper.style.height = (size + stemLenPx) + 'px';
+      wrapper.style.setProperty('--rot', rot);
+
+      wrapper.appendChild(makeLilySVG(size, stemLenPx));
+      garden.appendChild(wrapper);
+
+      requestAnimationFrame(()=>{
+        wrapper.classList.add('pop');
+        wrapper.style.transform = `scale(${scale}) rotate(${rot})`;
+      });
+    }
+
+    function handle(event){
+      const rect = garden.getBoundingClientRect();
+      const x = (event.touches? event.touches[0].clientX : event.clientX) - rect.left;
+      const y = (event.touches? event.touches[0].clientY : event.clientY) - rect.top;
+      hideHint();
+      plantLilyAt(x,y);
+    }
+
+    // remove hint on first interaction
+    function hideHint(){ const h=document.getElementById('clickHint'); if(h) h.style.display='none'; }
+
+    garden.addEventListener('click', handle);
+    garden.addEventListener('touchstart', (e)=>{ e.preventDefault(); handle(e); }, {passive:false});
+
+    resetBtn.addEventListener('click', ()=>{
+      garden.innerHTML='';
+    });
+
+    // Primeira dica: plantar 1 ao entrar
+    window.addEventListener('load', ()=>{
+      plantLilyAt(window.innerWidth*0.5, window.innerHeight*0.55);
+    });
+
+    // =====================
+    // Testes (ativar com ?test=1)
+    // =====================
+    (function runTests(){
+      const params = new URLSearchParams(location.search);
+      if(!params.get('test')) return; // não perturba a experiência normal
+
+      console.log('[TEST] Início dos testes');
+      // Teste 1: funções existem
+      console.assert(typeof makeLilySVG === 'function', 'makeLilySVG deve existir');
+      console.assert(typeof plantLilyAt === 'function', 'plantLilyAt deve existir');
+
+      // Teste 2: plantar no centro
+      const before = garden.childElementCount;
+      plantLilyAt(window.innerWidth*0.5, window.innerHeight*0.4);
+      console.assert(garden.childElementCount === before + 1, 'Deve acrescentar 1 lírio');
+
+      // Teste 3: respeita o limite MAX
+      const need = Math.max(0, MAX - garden.childElementCount);
+      for(let i=0;i<need+2;i++) plantLilyAt(50+i*5,50);
+      console.assert(garden.childElementCount <= MAX, 'Nunca deve ultrapassar MAX');
+
+      // Teste 4: caule tem altura positiva
+      const last = garden.lastElementChild;
+      const svg = last ? last.querySelector('svg') : null;
+      const okHeight = svg ? parseFloat(svg.getAttribute('height')) > 150 : false;
+      console.assert(okHeight, 'SVG deve ter altura suficiente para o caule');
+
+      console.log('[TEST] Terminado');
+    })();
+  </script>
+</body>
+</html>
