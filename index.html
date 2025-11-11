@@ -4,14 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   <title>Projecto Escolar 3B</title>
-
   <style>
     :root{
-      --accent:#b4388f; 
-      --petal:#ffe3f1; 
-      --petal-stroke:#e6a4c7; 
-      --center:#ffd86b; 
-      --center-stroke:#e6b84a;
+      --accent:#b4388f; --petal:#ffe3f1; --petal-stroke:#e6a4c7; --center:#ffd86b; --center-stroke:#e6b84a;
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -19,8 +14,11 @@
 
     body{
       background: linear-gradient(135deg, #fff1f8 0%, #f7e7ff 50%, #ffeef6 100%);
-      font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      -webkit-tap-highlight-color:transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      display:flex;
+      justify-content:center;
+      align-items:center;
       position:relative;
     }
 
@@ -31,12 +29,11 @@
       touch-action:manipulation;
     }
 
-    /* ✅ Flor responsiva e com animação */
     .lily{
       position:absolute;
       width:22vmin;
       height:22vmin;
-      transform:translate(-50%, -50%) scale(0.05);
+      transform:translate(-50%, -50%) scale(0.1);
       transform-origin:center;
       filter: drop-shadow(0 8px 20px rgba(180,56,143,.28));
       opacity:0;
@@ -52,9 +49,35 @@
     #clickHint{
       position:fixed;
       top:50%;left:50%;
-      transform:translate(-50%, -50%) scaleX(1.4);
+      transform:translate(-50%, -50%) scaleX(1.8);
       width:100%;
       text-align:center;
-      font-size:3vmin;
+      font-size:4vmin;
       color:#d1469c;
-      opacity:
+      opacity:0.25;
+      font-weight:300;
+      letter-spacing:0.5em;
+      pointer-events:none;
+      font-family:'Helvetica Neue','Roboto','Segoe UI',sans-serif;
+      animation:fadeHint 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes fadeHint{from{opacity:.22;}to{opacity:.36;}}
+
+    #reset{
+      position:fixed;
+      right:2vmin;bottom:2vmin;
+      background:var(--accent);
+      border:none;color:white;
+      padding:1vmin 2.4vmin;
+      border-radius:999px;
+      font-size:2vmin;font-weight:600;
+      box-shadow:0 6px 18px rgba(0,0,0,.18);
+      z-index:10;
+    }
+
+    .max-note{
+      position:fixed;
+      left:50%;bottom:4vmin;
+      transform:translateX(-50%);
+      background:#f
