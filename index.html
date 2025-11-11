@@ -5,362 +5,299 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
   <title>Jardim para a Minha Namorada 💗</title>
   <style>
-    :root{
-      --accent:#b4388f; --petal:#ffe3f1; --petal-stroke:#e6a4c7; --center:#ffd86b; --center-stroke:#e6b84a;
+    :root {
+      --accent: #b4388f; 
+      --petal: #ffe3f1; 
+      --petal-stroke: #e6a4c7; 
+      --center: #ffd86b; 
+      --center-stroke: #e6b84a;
     }
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;width:100%;overflow:hidden}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    body{
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    body {
       background: linear-gradient(135deg, #fff1f8 0%, #f7e7ff 50%, #ffeef6 100%);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      position:relative;
-      touch-action: manipulation;
-      -webkit-overflow-scrolling: touch; /* Melhora scrolling no iOS */
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    #garden{
-      position:absolute;
-      inset:0;
-      overflow:hidden;
-      touch-action: none;
-      /* Forçar aceleração de hardware para melhor performance */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
+    #garden {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
     }
 
-    .lily{
-      position:absolute;
-      width:22vmin;
-      height:22vmin;
-      transform:translate(-50%, -50%) scale(0.2);
-      transform-origin:center;
-      filter: drop-shadow(0 8px 20px rgba(180,56,143,.28));
-      opacity:0;
-      /* Transições otimizadas para mobile */
-      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
-      pointer-events:none;
+    .lily {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      pointer-events: none;
       z-index: 1;
-      /* Forçar aceleração de hardware */
-      will-change: transform, opacity;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
     }
 
-    .lily.pop{
-      opacity:1;
-      transform:translate(-50%, -50%) scale(1) rotate(var(--rot, 0deg));
-    }
-
-    /* Animação adicional para as flores - otimizada para mobile */
-    @keyframes float {
-      0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(var(--rot, 0deg)); }
-      50% { transform: translate(-50%, -52%) scale(1.02) rotate(var(--rot, 0deg)); }
-    }
-
+    /* ANIMAÇÃO SIMPLES E COMPATÍVEL */
     .lily.pop {
-      animation: float 4s ease-in-out infinite;
+      animation: growAndFloat 1.2s ease-out forwards;
     }
 
-    #clickHint{
-      position:fixed;
-      top:50%;left:50%;transform:translate(-50%, -50%);
-      width:100%;
-      text-align:center;
-      font-size:3.5vmin;
-      color:#d1469c;
-      opacity:0.25;
-      font-weight:300;
-      letter-spacing:0.6em;
-      pointer-events:none;
-      font-family:'Helvetica Neue','Roboto','Segoe UI',sans-serif;
-      animation:fadeHint 3s ease-in-out infinite alternate;
+    @keyframes growAndFloat {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Animação contínua após aparecer */
+    .lily.pop {
+      animation: growAndFloat 1.2s ease-out forwards, gentleFloat 3s ease-in-out infinite 1.2s;
+    }
+
+    @keyframes gentleFloat {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      }
+      50% {
+        transform: translate(-50%, -52%) scale(1.02) rotate(2deg);
+      }
+    }
+
+    #clickHint {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      text-align: center;
+      font-size: 18px;
+      color: #d1469c;
+      opacity: 0.3;
+      font-weight: 300;
+      letter-spacing: 8px;
+      pointer-events: none;
       z-index: 2;
-      /* Otimização para mobile */
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      animation: pulseHint 2s ease-in-out infinite alternate;
     }
 
-    @keyframes fadeHint{
-      0% { opacity: 0.22; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0.36; transform: translate(-50%, -50%) scale(1.05); }
+    @keyframes pulseHint {
+      0% { opacity: 0.2; }
+      100% { opacity: 0.4; }
     }
 
-    #reset{
-      position:fixed;
-      right:2vmin;bottom:2vmin;
-      background:var(--accent);
-      border:none;color:white;
-      padding:1vmin 2.4vmin;
-      border-radius:999px;
-      font-size:2vmin;font-weight:600;
-      box-shadow:0 6px 18px rgba(0,0,0,.18);
-      z-index:10;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: all 0.2s ease;
-      /* Melhorar aparência no mobile */
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    #reset:active{
-      transform: scale(0.95);
-      box-shadow:0 3px 9px rgba(0,0,0,.18);
-    }
-
-    /* Melhorias para dispositivos móveis */
-    @media (max-width: 768px) {
-      #reset {
-        padding: 1.5vmin 3vmin;
-        font-size: 2.5vmin;
-      }
-      
-      #clickHint {
-        font-size: 4vmin;
-        letter-spacing: 0.4em;
-        padding: 0 2vmin;
-      }
-      
-      .lily {
-        width: 25vmin;
-        height: 25vmin;
-      }
-    }
-
-    /* Para telas muito pequenas */
-    @media (max-width: 480px) {
-      #clickHint {
-        font-size: 3.5vmin;
-        letter-spacing: 0.2em;
-      }
-    }
-
-    .max-note{
-      position:fixed;
-      left:50%;bottom:4vmin;
-      transform:translateX(-50%);
-      background:#ffffffdd;
-      border-radius:999px;
-      padding:1vmin 2.6vmin;
-      font-size:2.2vmin;
-      border:1px solid #efc8e5;
-      opacity:0;
-      transition:opacity .3s ease;
+    #reset {
+      position: fixed;
+      right: 15px;
+      bottom: 15px;
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 10;
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
+      cursor: pointer;
     }
 
-    .max-note.show{
-      opacity:1;
-      animation: pulse 1.2s ease-in-out;
+    .max-note {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      border: 1px solid #efc8e5;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    @keyframes pulse {
-      0% { transform: translateX(-50%) scale(1); }
-      50% { transform: translateX(-50%) scale(1.1); }
+    .max-note.show {
+      opacity: 1;
+      animation: bounceNote 0.5s ease;
+    }
+
+    @keyframes bounceNote {
+      0% { transform: translateX(-50%) scale(0.8); }
+      70% { transform: translateX(-50%) scale(1.1); }
       100% { transform: translateX(-50%) scale(1); }
     }
 
-    /* Indicador de toque para mobile */
-    .touch-indicator {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(180, 56, 143, 0.3);
-      transform: translate(-50%, -50%) scale(0);
-      pointer-events: none;
-      z-index: 5;
-    }
-    
-    .touch-indicator.active {
-      animation: touchRipple 0.6s ease-out;
-    }
-    
-    @keyframes touchRipple {
-      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    /* Para mobile */
+    @media (max-width: 768px) {
+      .lily {
+        width: 70px;
+        height: 70px;
+      }
+      
+      #clickHint {
+        font-size: 16px;
+        letter-spacing: 6px;
+      }
+      
+      #reset {
+        padding: 12px 24px;
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 <body>
-
   <div id="garden"></div>
-  <div id="clickHint">TOCA NO ECRÃ 💕</div>
+  <div id="clickHint">TOCA NO ECRÃ</div>
   <div class="max-note" id="maxNote">Limite atingido 💗</div>
   <button id="reset">Limpar</button>
 
-<script>
-const garden = document.getElementById('garden');
-const maxNote = document.getElementById('maxNote');
-const resetBtn = document.getElementById('reset');
-const MAX = 70;
-let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-// Previne comportamentos padrão indesejados em dispositivos móveis
-document.addEventListener('touchmove', function(e) {
-  if (e.scale !== 1) { e.preventDefault(); }
-}, { passive: false });
-
-document.addEventListener('gesturestart', function(e) {
-  e.preventDefault();
-});
-
-// Detectar se é um dispositivo com touch
-function hasTouch() {
-  return 'ontouchstart' in document.documentElement ||
-         navigator.maxTouchPoints > 0 ||
-         navigator.msMaxTouchPoints > 0;
-}
-
-// Criar efeito visual de toque
-function createTouchIndicator(x, y) {
-  if (!hasTouch()) return;
-  
-  const indicator = document.createElement('div');
-  indicator.className = 'touch-indicator active';
-  indicator.style.left = x + 'px';
-  indicator.style.top = y + 'px';
-  
-  garden.appendChild(indicator);
-  
-  // Remover após a animação
-  setTimeout(() => {
-    if (indicator.parentNode) {
-      indicator.parentNode.removeChild(indicator);
-    }
-  }, 600);
-}
-
-function makeLilySVG(){
-  const svgNS = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(svgNS,'svg');
-  svg.setAttribute('viewBox','0 0 200 200');
-  svg.setAttribute('width','100%');
-  svg.setAttribute('height','100%');
-
-  const flowerG = document.createElementNS(svgNS,'g');
-  flowerG.setAttribute('transform','matrix(0.95,-0.14,0.08,0.92,10,0)');
-
-  for(let i=0;i<5;i++){
-    const g = document.createElementNS(svgNS,'g');
-    g.setAttribute('fill','var(--petal)');
-    g.setAttribute('stroke','var(--petal-stroke)');
-    g.setAttribute('stroke-width','2');
-    g.setAttribute('transform',`rotate(${i*72} 100 100)`);
-    const path = document.createElementNS(svgNS,'path');
-    path.setAttribute('d','M100 20 C78 42, 60 92, 100 146 C140 92, 122 42, 100 20');
-    g.appendChild(path);
-    flowerG.appendChild(g);
-  }
-
-  const center = document.createElementNS(svgNS,'circle');
-  center.setAttribute('cx','100'); center.setAttribute('cy','100'); center.setAttribute('r','18');
-  center.setAttribute('fill','var(--center)'); center.setAttribute('stroke','var(--center-stroke)');
-  center.setAttribute('stroke-width','2');
-  flowerG.appendChild(center);
-
-  svg.appendChild(flowerG);
-  return svg;
-}
-
-function plantLilyAt(x,y){
-  if(garden.childElementCount >= MAX){
-    maxNote.classList.add('show');
-    setTimeout(()=>maxNote.classList.remove('show'),1200);
-    return;
-  }
-
-  const lily = document.createElement('div');
-  lily.className='lily';
-  lily.style.left = x + 'px';
-  lily.style.top = y + 'px';
-  
-  // Adicionar rotação aleatória
-  const rotation = (Math.random() * 20 - 10);
-  lily.style.setProperty('--rot', rotation + 'deg');
-
-  lily.appendChild(makeLilySVG());
-  garden.appendChild(lily);
-
-  // Usar requestAnimationFrame para melhor performance
-  requestAnimationFrame(() => {
-    lily.classList.add('pop');
-  });
-}
-
-function handle(e){
-  // Previne comportamentos padrão
-  e.preventDefault();
-  
-  // Obtém coordenadas corretas tanto para mouse quanto para toque
-  const rect = garden.getBoundingClientRect();
-  let x, y;
-  
-  if (e.type === 'touchstart' || e.type === 'touchmove') {
-    x = e.touches[0].clientX - rect.left;
-    y = e.touches[0].clientY - rect.top;
+  <script>
+    // Deteção robusta de mobile
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
-    // Criar efeito visual de toque
-    createTouchIndicator(x, y);
-  } else {
-    x = e.clientX - rect.left;
-    y = e.clientY - rect.top;
-  }
-
-  hideHint();
-  plantLilyAt(x,y);
-}
-
-function hideHint(){
-  const h=document.getElementById('clickHint');
-  if(h) h.style.display='none';
-}
-
-// Eventos para desktop
-garden.addEventListener('click', handle);
-
-// Eventos para dispositivos móveis
-garden.addEventListener('touchstart', handle, {passive: false});
-
-// Adicionar evento de toque contínuo para criar várias flores com um gesto
-if (hasTouch()) {
-  garden.addEventListener('touchmove', handle, {passive: false});
-}
-
-resetBtn.addEventListener('click',()=>{
-  garden.innerHTML='';
-  // Mostra o hint novamente após limpar
-  const h=document.getElementById('clickHint');
-  if(h) h.style.display='block';
-});
-
-// Flor inicial
-window.addEventListener('load',()=>{
-  // Pequeno delay para garantir que o DOM está totalmente carregado
-  setTimeout(() => {
-    const r=garden.getBoundingClientRect();
-    plantLilyAt(r.width/2, r.height*0.55);
-  }, 100);
-});
-
-// Melhorar performance em dispositivos móveis
-if (isMobile) {
-  // Reduzir o número máximo de flores em dispositivos mais fracos
-  MAX = 50;
-  
-  // Otimizações adicionais para iOS
-  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-    document.body.style.webkitTransform = 'translate3d(0,0,0)';
-  }
-}
-</script>
+    const garden = document.getElementById('garden');
+    const maxNote = document.getElementById('maxNote');
+    const resetBtn = document.getElementById('reset');
+    const MAX_FLOWERS = isMobile ? 40 : 70; // Menos flores em mobile
+    
+    // Prevenir comportamentos indesejados
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+    
+    // SVG da flor - versão simplificada
+    function createFlowerSVG() {
+      return `
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <!-- Pétalas -->
+          <g fill="#ffe3f1" stroke="#e6a4c7" stroke-width="1.5">
+            <path d="M50 15 C35 30, 30 60, 50 75 C70 60, 65 30, 50 15"/>
+            <path d="M50 15 C35 30, 30 60, 50 75 C70 60, 65 30, 50 15" transform="rotate(72 50 50)"/>
+            <path d="M50 15 C35 30, 30 60, 50 75 C70 60, 65 30, 50 15" transform="rotate(144 50 50)"/>
+            <path d="M50 15 C35 30, 30 60, 50 75 C70 60, 65 30, 50 15" transform="rotate(216 50 50)"/>
+            <path d="M50 15 C35 30, 30 60, 50 75 C70 60, 65 30, 50 15" transform="rotate(288 50 50)"/>
+          </g>
+          <!-- Centro -->
+          <circle cx="50" cy="50" r="12" fill="#ffd86b" stroke="#e6b84a" stroke-width="1.5"/>
+        </svg>
+      `;
+    }
+    
+    // Criar flor numa posição
+    function createFlower(x, y) {
+      if (garden.children.length >= MAX_FLOWERS) {
+        showMaxNote();
+        return;
+      }
+      
+      const flower = document.createElement('div');
+      flower.className = 'lily';
+      flower.style.left = x + 'px';
+      flower.style.top = y + 'px';
+      
+      // Rotação aleatória
+      const rotation = Math.random() * 15 - 7.5;
+      flower.style.setProperty('--rotation', rotation + 'deg');
+      
+      flower.innerHTML = createFlowerSVG();
+      garden.appendChild(flower);
+      
+      // Forçar reflow e depois adicionar animação
+      void flower.offsetWidth;
+      flower.classList.add('pop');
+      
+      hideHint();
+    }
+    
+    // Mostrar aviso de limite
+    function showMaxNote() {
+      maxNote.classList.add('show');
+      setTimeout(() => maxNote.classList.remove('show'), 1500);
+    }
+    
+    // Esconder hint
+    function hideHint() {
+      const hint = document.getElementById('clickHint');
+      if (hint) hint.style.display = 'none';
+    }
+    
+    // Processar toques/cliques
+    function handleInteraction(e) {
+      e.preventDefault();
+      
+      let x, y;
+      
+      if (e.type.includes('touch')) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      } else {
+        x = e.clientX;
+        y = e.clientY;
+      }
+      
+      createFlower(x, y);
+    }
+    
+    // EVENTOS PRINCIPAIS
+    if (isMobile) {
+      // Para mobile - apenas touchstart (mais performance)
+      garden.addEventListener('touchstart', handleInteraction, { passive: false });
+    } else {
+      // Para desktop
+      garden.addEventListener('click', handleInteraction);
+    }
+    
+    // Botão limpar
+    resetBtn.addEventListener('click', function() {
+      garden.innerHTML = '';
+      document.getElementById('clickHint').style.display = 'block';
+    });
+    
+    // Flor inicial
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        const x = window.innerWidth / 2;
+        const y = window.innerHeight / 2;
+        createFlower(x, y);
+      }, 500);
+    });
+    
+    // Debug - ver se as animações estão a funcionar
+    console.log('Mobile:', isMobile);
+    console.log('Animations supported:', 
+      'animation' in document.documentElement.style || 
+      'webkitAnimation' in document.documentElement.style);
+  </script>
 </body>
 </html>
