@@ -82,11 +82,11 @@
     const garden = document.getElementById('garden');
     const maxNote = document.getElementById('maxNote');
     const resetBtn = document.getElementById('reset');
-    const MAX = 70; // <- limite de lírios
+    const MAX = 70;
 
     function makeLilySVG(size=140, stemLenPx=160){
       const svgNS = 'http://www.w3.org/2000/svg';
-      const unitsPerPx = 200/size; // 200 viewBox units = 'size' pixels
+      const unitsPerPx = 200/size;
       const stemUnits = Math.max(40*unitsPerPx, stemLenPx*unitsPerPx);
       const totalUnitsH = 200 + stemUnits;
 
@@ -96,9 +96,8 @@
       svg.setAttribute('height', size + stemLenPx);
       svg.setAttribute('preserveAspectRatio','xMidYMin meet');
 
-      // grupo flor (vista ligeiramente de lado)
       const flowerG = document.createElementNS(svgNS,'g');
-      flowerG.setAttribute('transform','matrix(0.95,-0.14,0.08,0.92,10,0)'); // inclinação para "lado"
+      flowerG.setAttribute('transform','matrix(0.95,-0.14,0.08,0.92,10,0)');
 
       for(let i=0;i<5;i++){
         const g = document.createElementNS(svgNS,'g');
@@ -138,8 +137,6 @@
       flowerG.appendChild(stamenGroup);
       svg.appendChild(flowerG);
 
-      // (caule removido conforme pedido)
-
       return svg;
     }
 
@@ -150,83 +147,8 @@
         return;
       }
       const rect = garden.getBoundingClientRect();
-      const stemLenPx = Math.max(40, rect.bottom - (rect.top + y) - 8); // até ao fundo
+      const stemLenPx = Math.max(40, rect.bottom - (rect.top + y) - 8);
 
       const wrapper = document.createElement('div');
       wrapper.className='lily';
-      const rot = (Math.random()*20-10).toFixed(1)+'deg';
-      const scale = 0.9 + Math.random()*0.4;
-      const size = 130 + Math.floor(Math.random()*30);
-
-      // posiciona para que o centro da flor esteja no clique e o caule siga para baixo
-      wrapper.style.left = (x - size/2) + 'px';
-      wrapper.style.top  = (y - size/2) + 'px';
-      wrapper.style.width = size + 'px';
-      wrapper.style.height = (size + stemLenPx) + 'px';
-      wrapper.style.setProperty('--rot', rot);
-
-      wrapper.appendChild(makeLilySVG(size, stemLenPx));
-      garden.appendChild(wrapper);
-
-      requestAnimationFrame(()=>{
-        wrapper.classList.add('pop');
-        wrapper.style.transform = `scale(${scale}) rotate(${rot})`;
-      });
-    }
-
-    function handle(event){
-      const rect = garden.getBoundingClientRect();
-      const x = (event.touches? event.touches[0].clientX : event.clientX) - rect.left;
-      const y = (event.touches? event.touches[0].clientY : event.clientY) - rect.top;
-      hideHint();
-      plantLilyAt(x,y);
-    }
-
-    // remove hint on first interaction
-    function hideHint(){ const h=document.getElementById('clickHint'); if(h) h.style.display='none'; }
-
-    garden.addEventListener('click', handle);
-    garden.addEventListener('touchstart', (e)=>{ e.preventDefault(); handle(e); }, {passive:false});
-
-    resetBtn.addEventListener('click', ()=>{
-      garden.innerHTML='';
-    });
-
-    // Primeira dica: plantar 1 ao entrar
-    window.addEventListener('load', ()=>{
-      plantLilyAt(window.innerWidth*0.5, window.innerHeight*0.55);
-    });
-
-    // =====================
-    // Testes (ativar com ?test=1)
-    // =====================
-    (function runTests(){
-      const params = new URLSearchParams(location.search);
-      if(!params.get('test')) return; // não perturba a experiência normal
-
-      console.log('[TEST] Início dos testes');
-      // Teste 1: funções existem
-      console.assert(typeof makeLilySVG === 'function', 'makeLilySVG deve existir');
-      console.assert(typeof plantLilyAt === 'function', 'plantLilyAt deve existir');
-
-      // Teste 2: plantar no centro
-      const before = garden.childElementCount;
-      plantLilyAt(window.innerWidth*0.5, window.innerHeight*0.4);
-      console.assert(garden.childElementCount === before + 1, 'Deve acrescentar 1 lírio');
-
-      // Teste 3: respeita o limite MAX
-      const need = Math.max(0, MAX - garden.childElementCount);
-      for(let i=0;i<need+2;i++) plantLilyAt(50+i*5,50);
-      console.assert(garden.childElementCount <= MAX, 'Nunca deve ultrapassar MAX');
-
-      // Teste 4: caule tem altura positiva
-      const last = garden.lastElementChild;
-      const svg = last ? last.querySelector('svg') : null;
-      const okHeight = svg ? parseFloat(svg.getAttribute('height')) > 150 : false;
-      console.assert(okHeight, 'SVG deve ter altura suficiente para o caule');
-
-      console.log('[TEST] Terminado');
-    })();
-  </script>
-</body>
-</html>
+      const rot = (Math.random()*20-10).toFixed(
